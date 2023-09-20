@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.springbootsample.dto.CreateUserDto;
 import com.example.springbootsample.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -29,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody CreateUserDto createUserDto) {
+    public ResponseEntity<Object> create(@Valid @RequestBody CreateUserDto createUserDto) {
         try {
             ResponseEntity<Object> response = userService.addUser(createUserDto);
             return ResponseEntity.status(response.getStatusCode()).body(response);
