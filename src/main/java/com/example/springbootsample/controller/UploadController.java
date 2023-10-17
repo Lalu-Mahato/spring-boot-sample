@@ -3,6 +3,7 @@ package com.example.springbootsample.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -55,4 +56,28 @@ public class UploadController {
         }
     }
 
+    @PostMapping("/collections")
+    public ResponseEntity<Object> collectionUpload(@RequestParam("file") MultipartFile multipartFile) {
+        try {
+            IOUtils.setByteArrayMaxOverride(500000000); // 500MB
+
+            XSSFWorkbook xssfWorkbook = new XSSFWorkbook(multipartFile.getInputStream());
+            XSSFSheet worksheet = xssfWorkbook.getSheet("Sheet1");
+
+            if (worksheet != null) {
+                System.out.println(worksheet.getPhysicalNumberOfRows());
+                for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
+                    XSSFRow row = worksheet.getRow(i);
+                    System.out.println(row.getCell(1).getStringCellValue());
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sheet 'Sheet1' not found in the workbook");
+            }
+
+            xssfWorkbook.close();
+            return ResponseEntity.ok("File uploaded successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error:" + e.getMessage());
+        }
+    }
 }
