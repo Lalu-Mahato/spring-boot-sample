@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.springbootsample.dto.Emi;
 import com.example.springbootsample.dto.Loan;
 import com.example.springbootsample.dto.Product;
 import com.example.springbootsample.dto.Prospect;
@@ -71,6 +72,7 @@ public class UploadController {
             List<Product> products = new ArrayList<>();
             List<Prospect> prospects = new ArrayList<>();
             List<Loan> loans = new ArrayList<>();
+            List<Emi> emis = new ArrayList<>();
 
             if (worksheet != null) {
                 for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
@@ -99,13 +101,36 @@ public class UploadController {
                     loan.setTotalTenure((int) row.getCell(21).getNumericCellValue());
                     loan.setLoanEndDate((Date) row.getCell(19).getDateCellValue());
                     loans.add(loan);
+
+                    // EMI
+                    Emi emi = new Emi();
+                    emi.setCurrentTenure((int) row.getCell(20).getNumericCellValue());
+                    emi.setResidualTenure((int) row.getCell(22).getNumericCellValue());
+                    emi.setTotalEmiAmount((double) row.getCell(8).getNumericCellValue());
+                    emi.setPrincipalEmiAmount((double) row.getCell(9).getNumericCellValue());
+                    emi.setInterestEmiAmount((double) row.getCell(10).getNumericCellValue());
+                    emi.setEmiDueDate((Date) row.getCell(4).getDateCellValue());
+                    emi.setTotalOutstanding((double) row.getCell(5).getNumericCellValue());
+                    emi.setPrincipalOutstanding((double) row.getCell(6).getNumericCellValue());
+                    emi.setInterestOutstanding((double) row.getCell(7).getNumericCellValue());
+                    emi.setArrearAmount((double) row.getCell(11).getNumericCellValue());
+                    emi.setPrincipalArrearAmount((double) row.getCell(12).getNumericCellValue());
+                    emi.setInterestArrearAmount((double) row.getCell(13).getNumericCellValue());
+                    emi.setOtherCharges((double) row.getCell(14).getNumericCellValue());
+                    emi.setTotalCollectionAmount((double) row.getCell(15).getNumericCellValue());
+                    emi.setUnpaidInstallment((int) row.getCell(24).getNumericCellValue());
+                    emi.setPaidInstallment((int) row.getCell(25).getNumericCellValue());
+                    emi.setLastPaidAmount((double) row.getCell(18).getNumericCellValue());
+                    emi.setLastRepaymentDate((Date) row.getCell(17).getDateCellValue());
+                    emi.setDpdInDays((int) row.getCell(16).getNumericCellValue());
+                    emis.add(emi);
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sheet 'Sheet1' not found in the workbook");
             }
 
             xssfWorkbook.close();
-            return ResponseEntity.ok("File uploaded successfully");
+            return ResponseEntity.ok(emis);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error:" + e.getMessage());
         }
