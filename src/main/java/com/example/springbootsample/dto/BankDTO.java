@@ -3,7 +3,7 @@ package com.example.springbootsample.dto;
 import lombok.Data;
 
 @Data
-public class Product {
-    private Integer id;
+public class BankDTO {
+    private Integer code;
     private String name;
 }

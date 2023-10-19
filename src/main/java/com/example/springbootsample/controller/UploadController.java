@@ -17,10 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.springbootsample.dto.Emi;
-import com.example.springbootsample.dto.Loan;
-import com.example.springbootsample.dto.Product;
-import com.example.springbootsample.dto.Prospect;
+import com.example.springbootsample.dto.BankDTO;
+import com.example.springbootsample.dto.EmiDTO;
+import com.example.springbootsample.dto.LoanDTO;
+import com.example.springbootsample.dto.ProductDTO;
+import com.example.springbootsample.dto.ProspectDTO;
 import com.example.springbootsample.model.Fieldofficer;
 import com.example.springbootsample.repository.FieldofficerRepository;
 
@@ -69,23 +70,24 @@ public class UploadController {
             XSSFWorkbook xssfWorkbook = new XSSFWorkbook(multipartFile.getInputStream());
             XSSFSheet worksheet = xssfWorkbook.getSheet("Sheet1");
 
-            List<Product> products = new ArrayList<>();
-            List<Prospect> prospects = new ArrayList<>();
-            List<Loan> loans = new ArrayList<>();
-            List<Emi> emis = new ArrayList<>();
+            List<ProductDTO> products = new ArrayList<>();
+            List<ProspectDTO> prospects = new ArrayList<>();
+            List<LoanDTO> loans = new ArrayList<>();
+            List<EmiDTO> emis = new ArrayList<>();
+            List<BankDTO> banks = new ArrayList<>();
 
             if (worksheet != null) {
                 for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
                     XSSFRow row = worksheet.getRow(i);
 
                     // Products
-                    Product product = new Product();
+                    ProductDTO product = new ProductDTO();
                     product.setId((int) row.getCell(27).getNumericCellValue());
                     product.setName((String) row.getCell(26).getStringCellValue());
                     products.add(product);
 
                     // Prospect
-                    Prospect prospect = new Prospect();
+                    ProspectDTO prospect = new ProspectDTO();
                     prospect.setName((String) row.getCell(1).getStringCellValue());
                     prospect.setAddress((String) row.getCell(29).getStringCellValue());
                     prospect.setMobileNumber((int) row.getCell(28).getNumericCellValue());
@@ -93,7 +95,7 @@ public class UploadController {
                     prospects.add(prospect);
 
                     // Loan
-                    Loan loan = new Loan();
+                    LoanDTO loan = new LoanDTO();
                     loan.setAccountNumber((long) row.getCell(0).getNumericCellValue());
                     loan.setAmountSanctioned((double) row.getCell(2).getNumericCellValue());
                     loan.setDisbursalDate((Date) row.getCell(3).getDateCellValue());
@@ -103,7 +105,7 @@ public class UploadController {
                     loans.add(loan);
 
                     // EMI
-                    Emi emi = new Emi();
+                    EmiDTO emi = new EmiDTO();
                     emi.setCurrentTenure((int) row.getCell(20).getNumericCellValue());
                     emi.setResidualTenure((int) row.getCell(22).getNumericCellValue());
                     emi.setTotalEmiAmount((double) row.getCell(8).getNumericCellValue());
@@ -124,13 +126,20 @@ public class UploadController {
                     emi.setLastRepaymentDate((Date) row.getCell(17).getDateCellValue());
                     emi.setDpdInDays((int) row.getCell(16).getNumericCellValue());
                     emis.add(emi);
+
+                    // Bank
+                    BankDTO bankDTO = new BankDTO();
+                    bankDTO.setCode((int) row.getCell(31).getNumericCellValue());
+                    bankDTO.setName((String) row.getCell(32).getStringCellValue());
+                    banks.add(bankDTO);
+
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sheet 'Sheet1' not found in the workbook");
             }
 
             xssfWorkbook.close();
-            return ResponseEntity.ok(emis);
+            return ResponseEntity.ok(loans);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error:" + e.getMessage());
         }

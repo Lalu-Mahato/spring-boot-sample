@@ -5,7 +5,7 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class Emi {
+public class EmiDTO {
     private Integer currentTenure;
     private Integer residualTenure;
     private Double totalEmiAmount;
