@@ -3,6 +3,7 @@ package com.example.springbootsample.controller;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -22,8 +23,11 @@ import com.example.springbootsample.dto.EmiDTO;
 import com.example.springbootsample.dto.LoanDTO;
 import com.example.springbootsample.dto.ProductDTO;
 import com.example.springbootsample.dto.ProspectDTO;
+import com.example.springbootsample.model.Bank;
 import com.example.springbootsample.model.Fieldofficer;
+import com.example.springbootsample.repository.BankRepository;
 import com.example.springbootsample.repository.FieldofficerRepository;
+import com.example.springbootsample.service.BankService;
 
 @RestController
 @RequestMapping("/api/v1/upload")
@@ -31,6 +35,11 @@ public class UploadController {
 
     @Autowired
     private FieldofficerRepository fieldofficerRepository;
+    @Autowired
+    private BankService bankService;
+
+    @Autowired
+    private BankRepository bankRepository;
 
     @PostMapping
     public ResponseEntity<Object> upload(@RequestParam("file") MultipartFile multipartFile) {
@@ -128,12 +137,21 @@ public class UploadController {
                     emis.add(emi);
 
                     // Bank
-                    BankDTO bankDTO = new BankDTO();
-                    bankDTO.setCode((int) row.getCell(31).getNumericCellValue());
-                    bankDTO.setName((String) row.getCell(32).getStringCellValue());
-                    banks.add(bankDTO);
+                    int bankCode = (int) row.getCell(31).getNumericCellValue();
+                    Optional<Bank> optionalBank = bankRepository.FindByCode(bankCode);
 
+                    Bank bank;
+                    if (optionalBank.isPresent()) {
+                        bank = optionalBank.get();
+                    } else {
+                        BankDTO bankDTO = new BankDTO();
+                        bankDTO.setCode((int) row.getCell(31).getNumericCellValue());
+                        bankDTO.setName((String) row.getCell(32).getStringCellValue());
+                        bank = bankService.create(bankDTO);
+
+                    }
                 }
+                return ResponseEntity.status(HttpStatus.OK).body("Sheet 'Sheet1' not found in the workbook");
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sheet 'Sheet1' not found in the workbook");
             }
